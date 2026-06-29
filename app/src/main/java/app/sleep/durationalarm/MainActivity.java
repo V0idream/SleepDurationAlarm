@@ -31,6 +31,7 @@ public final class MainActivity extends Activity {
     private NumberPicker minutesPicker;
     private EditText labelInput;
     private TextView summaryText;
+    private boolean loadingConfig;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -42,6 +43,15 @@ public final class MainActivity extends Activity {
                 Config.PREFS_NAME, Context.MODE_PRIVATE);
         setContentView(createContent());
         loadConfig();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (preferences != null
+                && enabledSwitch != null) {
+            loadConfig();
+        }
     }
 
     private View createContent() {
@@ -67,21 +77,38 @@ public final class MainActivity extends Activity {
         intro.setLineSpacing(0, 1.25f);
         root.addView(intro, marginTop(dp(10)));
 
-        LinearLayout planCard = card();
-        root.addView(planCard, marginTop(dp(24)));
-
+        LinearLayout enableCard = card();
+        root.addView(enableCard, marginTop(dp(24)));
         enabledSwitch = new Switch(this);
         enabledSwitch.setText("启用入睡闹钟计划");
         enabledSwitch.setTextSize(17);
         enabledSwitch.setTextColor(COLOR_TEXT);
         enabledSwitch.setTypeface(Typeface.DEFAULT_BOLD);
-        planCard.addView(enabledSwitch,
+        enableCard.addView(enabledSwitch,
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT));
+        enabledSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (loadingConfig) {
+                return;
+            }
+            preferences.edit()
+                    .putBoolean(Config.KEY_ENABLED, checked)
+                    .apply();
+            ConfigBridgeReceiver.sendConfigToHealth(this);
+            updateSummary();
+            Toast.makeText(
+                    this,
+                    checked ? "计划已立即启用" : "计划已立即关闭",
+                    Toast.LENGTH_SHORT).show();
+        });
 
+        LinearLayout planCard = card();
+        root.addView(planCard, marginTop(dp(12)));
         planCard.addView(text("计划睡眠时长", 13, COLOR_MUTED),
-                marginTop(dp(24)));
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
 
         LinearLayout durationRow = new LinearLayout(this);
         durationRow.setOrientation(LinearLayout.HORIZONTAL);
@@ -131,7 +158,7 @@ public final class MainActivity extends Activity {
         root.addView(testButton, marginTop(dp(16)));
 
         TextView note = text(
-                "LSPosed 作用域仅需勾选“OPPO 健康”。首次使用请保存计划并重启健康进程。",
+                "LSPosed 作用域需勾选“OPPO 健康”“时钟”和“系统框架”。首次使用请保存计划并重启手机。",
                 13, COLOR_MUTED);
         note.setLineSpacing(0, 1.25f);
         root.addView(note, marginTop(dp(20)));
@@ -140,6 +167,7 @@ public final class MainActivity extends Activity {
     }
 
     private void loadConfig() {
+        loadingConfig = true;
         enabledSwitch.setChecked(preferences.getBoolean(
                 Config.KEY_ENABLED, Config.DEFAULT_ENABLED));
         hoursPicker.setValue(preferences.getInt(
@@ -148,6 +176,7 @@ public final class MainActivity extends Activity {
                 Config.KEY_MINUTES, Config.DEFAULT_MINUTES));
         labelInput.setText(preferences.getString(
                 Config.KEY_LABEL, Config.DEFAULT_LABEL));
+        loadingConfig = false;
         updateSummary();
     }
 
@@ -168,7 +197,6 @@ public final class MainActivity extends Activity {
         }
 
         preferences.edit()
-                .putBoolean(Config.KEY_ENABLED, enabledSwitch.isChecked())
                 .putInt(Config.KEY_HOURS, hoursPicker.getValue())
                 .putInt(Config.KEY_MINUTES, minutesPicker.getValue())
                 .putString(Config.KEY_LABEL, label)

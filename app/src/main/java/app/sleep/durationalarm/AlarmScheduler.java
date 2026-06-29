@@ -44,6 +44,7 @@ final class AlarmScheduler {
                         : label.trim());
         intent.putExtra(AlarmClock.EXTRA_SKIP_UI, true);
         intent.putExtra(EXTRA_DELETE_AFTER_USE, 1);
+        intent.putExtra(Config.EXTRA_SLEEP_ALARM, true);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         context.startActivity(intent);

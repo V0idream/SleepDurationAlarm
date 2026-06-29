@@ -24,10 +24,6 @@
         </activity>
 
         <receiver
-            android:name=".AlarmBridgeReceiver"
-            android:exported="true" />
-
-        <receiver
             android:name=".ConfigBridgeReceiver"
             android:exported="true" />
 

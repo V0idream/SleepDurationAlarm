@@ -11,7 +11,15 @@ final class Config {
             "app.sleep.durationalarm.CONFIG_REQUEST";
     static final String ACTION_CONFIG_UPDATE =
             "app.sleep.durationalarm.CONFIG_UPDATE";
+    static final String ACTION_DISABLE_PLAN =
+            "app.sleep.durationalarm.DISABLE_PLAN";
     static final String HEALTH_PACKAGE = "com.heytap.health";
+    static final String EXTRA_SLEEP_ALARM =
+            "app.sleep.durationalarm.EXTRA_SLEEP_ALARM";
+    static final String EXTRA_CLOCK_BRIDGE =
+            "app.sleep.durationalarm.EXTRA_CLOCK_BRIDGE";
+    static final String EXTRA_DURATION_MINUTES = "duration_minutes";
+    static final String EXTRA_ALARM_LABEL = "alarm_label";
 
     static final boolean DEFAULT_ENABLED = true;
     static final int DEFAULT_HOURS = 8;

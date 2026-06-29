@@ -44,13 +44,13 @@
 
 ## 🧩 兼容性
 
-- 模块版本：`1.0.1`
+- 模块版本：`1.2.0`
 - Android：12 及以上
 - OPPO 健康：`6.4.6_cb99e90_260626`
 - 健康包名：`com.heytap.health`
 - OPPO 时钟：`16.19.0`
 - 时钟包名：`com.coloros.alarmclock`
-- LSPosed 作用域：仅 `OPPO 健康`
+- LSPosed 作用域：`OPPO 健康`、`时钟`、`系统框架`
 
 其他健康或时钟版本未经验证。应用更新导致内部类名或公开闹钟入口变化后，模块可能失效。
 
@@ -70,8 +70,10 @@ SleepModeManager.t(SleepModelSettings)
 1. UI 保存计划并通过显式配置桥同步到健康 `:transport` 进程。
 2. 收到真实入睡状态后读取当前计划时长。
 3. 计算“入睡时刻 + 计划时长”，向上取整到下一整分钟。
-4. 通过 OPPO 时钟公开的 `SET_ALARM` 接口创建闹钟。
-5. 设置 `DELETE_AFTER_USE=1`，闹钟响铃后自动删除。
+4. 系统框架放行时钟包，先由健康进程拉起时钟主程序。
+5. 时钟取得前台资格后，由时钟自身 UID 调用受保护的 `SET_ALARM` 接口。
+6. 设置成功后立即关闭模块自己的计划开关，确保每次计划只执行一次。
+7. 设置 `DELETE_AFTER_USE=1`，闹钟响铃后自动删除，并关闭临时时钟页面。
 
 手机免打扰状态不会触发闹钟。
 
@@ -80,9 +82,9 @@ SleepModeManager.t(SleepModelSettings)
 ## 🚀 使用方法
 
 1. 从 [Releases](https://github.com/V0idream/SleepDurationAlarm/releases/latest) 下载并安装 APK。
-2. 打开“睡眠时长闹钟”，设置启用状态、睡眠时长和闹钟名称，然后点击“保存计划”。
-3. 在 LSPosed 中启用模块，作用域仅勾选“OPPO 健康”。
-4. 重启 OPPO 健康相关进程或重启手机。
+2. 打开“睡眠时长闹钟”；启用开关切换后即时生效，“保存计划”仅保存睡眠时长和闹钟名称。
+3. 在 LSPosed 中启用模块，作用域勾选“OPPO 健康”“时钟”和“系统框架”。
+4. 重启手机。
 5. 可先使用“测试创建 2 分钟后的闹钟”验证 OPPO 时钟接口。
 
 正常触发日志：

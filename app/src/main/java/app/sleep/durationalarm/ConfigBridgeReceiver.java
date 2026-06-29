@@ -8,8 +8,17 @@ import android.content.SharedPreferences;
 public final class ConfigBridgeReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent != null
-                && Config.ACTION_CONFIG_REQUEST.equals(intent.getAction())) {
+        if (intent == null) {
+            return;
+        }
+        if (Config.ACTION_CONFIG_REQUEST.equals(intent.getAction())) {
+            sendConfigToHealth(context);
+        } else if (Config.ACTION_DISABLE_PLAN.equals(intent.getAction())) {
+            context.getSharedPreferences(
+                            Config.PREFS_NAME, Context.MODE_PRIVATE)
+                    .edit()
+                    .putBoolean(Config.KEY_ENABLED, false)
+                    .apply();
             sendConfigToHealth(context);
         }
     }
